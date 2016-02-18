@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -27,18 +28,22 @@ func Proxy(ip string) error {
 		return err
 	}
 
-	handler := http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Scheme = "http"
-		r.URL.Host = ip+":2375"
+		r.URL.Host = ip + ":2375"
 
 		if len(r.Header["Upgrade"]) > 0 && strings.ToLower(r.Header["Upgrade"][0]) == "tcp" {
+			fmt.Println("@@@@@@@ 1")
 			hj, ok := w.(http.Hijacker)
+			fmt.Println("@@@@@@@ 2", hj, ok)
 			if !ok {
 				w.WriteHeader(http.StatusServiceUnavailable)
 				return
 			}
 
-			conn, _, err := hj.Hijack()
+			fmt.Println("@@@@@@@ 3")
+			conn, foo, err := hj.Hijack()
+			fmt.Println("@@@@@@@ 4", conn, foo, err)
 			if err != nil {
 				w.WriteHeader(http.StatusServiceUnavailable)
 				return
